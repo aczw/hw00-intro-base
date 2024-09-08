@@ -8,13 +8,14 @@ import OpenGLRenderer from './rendering/gl/OpenGLRenderer';
 import Camera from './Camera';
 import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
+import type Drawable from './rendering/gl/Drawable';
 
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
+  geometry: "cube",
+  'color1': [31, 115, 210, 1],
   tesselations: 5,
-  'color1': [255, 0, 0, 1],
-  'Load Scene': loadScene, // A function pointer, essentially
 };
 
 let icosphere: Icosphere;
@@ -31,6 +32,13 @@ function loadScene() {
   cube.create();
 }
 
+function setupControls() {
+  const gui = new DAT.GUI();
+  gui.add(controls, "geometry", ["icosphere", "square", "cube"]);
+  gui.addColor(controls, 'color1');
+  gui.add(controls, 'tesselations', 0, 8).step(1);
+}
+
 function main() {
   // Initial display for framerate
   const stats = Stats();
@@ -41,10 +49,7 @@ function main() {
   document.body.appendChild(stats.domElement);
 
   // Add controls to the gui
-  const gui = new DAT.GUI();
-  gui.add(controls, 'tesselations', 0, 8).step(1);
-  gui.add(controls, 'Load Scene');
-  gui.addColor(controls, 'color1');
+  setupControls();
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -76,23 +81,26 @@ function main() {
     stats.begin();
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
+
     if(controls.tesselations != prevTesselations)
     {
       prevTesselations = controls.tesselations;
       icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, prevTesselations);
       icosphere.create();
     }
+
     lambert.setGeometryColor(vec4.fromValues(
       controls.color1[0] / 255,
       controls.color1[1] / 255,
       controls.color1[2] / 255,
       controls.color1[3])
     );
-    renderer.render(camera, lambert, [
-      // icosphere,
-      // square,
-      cube
-    ]);
+
+    let geometry: Drawable = cube;
+    if (controls.geometry === "icosphere") geometry = icosphere;
+    if (controls.geometry === "square") geometry = square;
+    renderer.render(camera, lambert, [geometry]);
+
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame
