@@ -5,6 +5,7 @@ class Cube extends Drawable {
   indices: Uint32Array;
   positions: Float32Array;
   normals: Float32Array;
+  uv: Float32Array;
 
   constructor() {
     super();
@@ -95,10 +96,43 @@ class Cube extends Drawable {
       0, -1, 0, 0,
       0, -1, 0, 0,
     ]);
+    this.uv = new Float32Array([
+      // Top (+y) face
+      1, 0,
+      1, 1,
+      0, 1,
+      0, 0,
+      // Front (+z) face
+      1, 0,
+      1, 1,
+      0, 1,
+      0, 0,
+      // Left (-x) face
+      1, 0,
+      1, 1,
+      0, 1,
+      0, 0,
+      // Back (-z) face
+      1, 0,
+      1, 1,
+      0, 1,
+      0, 0,
+      // Right (+x) face
+      1, 0,
+      1, 1,
+      0, 1,
+      0, 0,
+      // Bottom (-y) face
+      1, 0,
+      1, 1,
+      0, 1,
+      0, 0,
+    ]);
 
     this.generateIdx();
     this.generatePos();
     this.generateNor();
+    this.generateUV();
 
     this.count = this.indices.length;
 
@@ -110,6 +144,9 @@ class Cube extends Drawable {
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.bufNor);
     gl.bufferData(gl.ARRAY_BUFFER, this.normals, gl.STATIC_DRAW);
+  
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.bufUV);
+    gl.bufferData(gl.ARRAY_BUFFER, this.uv, gl.STATIC_DRAW);
 
     console.log("Created sphere!")
   }

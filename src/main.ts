@@ -13,7 +13,7 @@ import type Drawable from './rendering/gl/Drawable';
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-  geometry: "cube",
+  geometry: "cube - custom",
   'color1': [31, 115, 210, 1],
   tesselations: 5,
 };
@@ -34,7 +34,7 @@ function loadScene() {
 
 function setupControls() {
   const gui = new DAT.GUI();
-  gui.add(controls, "geometry", ["icosphere", "square", "cube"]);
+  gui.add(controls, "geometry", ["icosphere", "square", "cube - regular", "cube - custom"]);
   gui.addColor(controls, 'color1');
   gui.add(controls, 'tesselations', 0, 8).step(1);
 }
@@ -70,9 +70,14 @@ function main() {
   renderer.setClearColor(0.2, 0.2, 0.2, 1);
   gl.enable(gl.DEPTH_TEST);
 
-  const lambert = new ShaderProgram([
+  const lambertProg = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.glsl')),
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.glsl')),
+  ]);
+
+  const cubeProg = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/cube.vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/cube.frag.glsl')),
   ]);
 
   // This function will be called every frame
@@ -89,17 +94,26 @@ function main() {
       icosphere.create();
     }
 
-    lambert.setGeometryColor(vec4.fromValues(
+    
+    const geometryColor = vec4.fromValues(
       controls.color1[0] / 255,
       controls.color1[1] / 255,
       controls.color1[2] / 255,
-      controls.color1[3])
+      controls.color1[3]
     );
 
+    let shaderProgram = lambertProg;
+    if (controls.geometry === "cube - custom") {
+      shaderProgram = cubeProg;
+      cubeProg.setGeometryColor(geometryColor);
+    } else {
+      lambertProg.setGeometryColor(geometryColor);
+    }
+    
     let geometry: Drawable = cube;
     if (controls.geometry === "icosphere") geometry = icosphere;
     if (controls.geometry === "square") geometry = square;
-    renderer.render(camera, lambert, [geometry]);
+    renderer.render(camera, shaderProgram, [geometry]);
 
     stats.end();
 
