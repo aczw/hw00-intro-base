@@ -74,27 +74,21 @@ vec2 worley2(vec3 p) {
 }
 
 float worley(vec3 p) { 
-    return worley2(p).x;
+    return 1.0-worley2(p).x;
 }
 
 void main()
 {
     // Material base color (before shading)
-        vec4 diffuseColor = u_Color;
+    vec4 color = u_Color;
 
-        // Calculate the diffuse term for Lambert shading
-        float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
-        // Avoid negative lighting values
-        // diffuseTerm = clamp(diffuseTerm, 0, 1);
-
-        float ambientTerm = 0.2;
-
-        float lightIntensity = diffuseTerm + ambientTerm;   //Add a small float value to the color multiplier
-                                                            //to simulate ambient lighting. This ensures that faces that are not
-                                                            //lit by our point light are not completely black.
-
-        // Compute final shaded color
-        // out_Col = vec4(diffuseColor.rgb, diffuseColor.a);
-        float worley = worley(fs_Pos.xyz);
-        out_Col = vec4(worley, worley, worley, 1);
+    // Compute final shaded color
+    // out_Col = vec4(diffuseColor.rgb, diffuseColor.a);
+    float foam1 = worley(fs_Pos.xyz);
+    if (foam1 < 0.5) {
+        color = vec4(foam1, foam1, foam1, 1);
+    }
+    
+    out_Col = color;
+    // out_Col = vec4(foam1, foam1, foam1, 1);
 }
