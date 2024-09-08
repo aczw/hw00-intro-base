@@ -82,6 +82,8 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/cube.frag.glsl')),
   ]);
 
+  let time = 0;
+
   // This function will be called every frame
   function tick() {
     camera.update();
@@ -106,11 +108,10 @@ function main() {
     let shaderProgram = lambertProg;
     if (controls.geometry === "cube - custom") {
       shaderProgram = cubeProg;
-      cubeProg.setGeometryColor(geometryColor);
-      cubeProg.setNumCells(controls.numCells);
-    } else {
-      lambertProg.setGeometryColor(geometryColor);
+      shaderProgram.setNumCells(controls.numCells);
     }
+    shaderProgram.setGeometryColor(geometryColor);
+    shaderProgram.setTime(time);
     
     let geometry: Drawable = cube;
     if (controls.geometry === "icosphere") geometry = icosphere;
@@ -118,6 +119,7 @@ function main() {
     renderer.render(camera, shaderProgram, [geometry]);
 
     stats.end();
+    time += 1;
 
     // Tell the browser to call `tick` again whenever it renders a new frame
     requestAnimationFrame(tick);

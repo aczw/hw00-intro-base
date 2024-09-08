@@ -13,6 +13,7 @@ precision highp float;
 
 uniform vec4 u_Color; // The color with which to render this instance of geometry.
 uniform int u_NumCells;
+uniform int u_Time;
 
 // These are the interpolated values out of the rasterizer, so you can't know
 // their specific values without knowing the vertices that contributed to them
@@ -86,12 +87,11 @@ void main()
     // Material base color (before shading)
     vec4 color = u_Color;
 
-    // Compute final shaded color
-    float foam1 = worley(fs_Pos.xyz + random3(fs_Pos.xyz) * 0.4);
+    float foam1 = worley(fs_Pos.xyz + vec3(float(u_Time) * 0.005) + random3(fs_Pos.xyz) * 0.3);
     foam1 = easeInExpo_mod(foam1);
     foam1 *= foam1;
     if (foam1 < 0.02) {
-        color = mix(vec4(1, 1, 1, 1), u_Color, 0.25);
+        color = mix(vec4(1.0), u_Color, 0.25);
     }
     
     out_Col = color;
