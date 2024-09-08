@@ -93,14 +93,14 @@ void main()
     foam0 *= easeInExpo_mod(foam0);
     foam0 *= foam0;
     if (foam0 < 0.002) {
-        color = mix(vec4(0, 0, 0, 1), u_Color, 0.7);
+        color = mix(vec4(0, 0, 0, 1), u_Color, 0.75);
     }
 
     float foam1 = worley(fs_Pos.xyz + vec3(float(u_Time) * mix(0.0001, 0.01, u_FoamSpeed / 10.0)) + random3(fs_Pos.xyz) * u_FoamRoughness);
     foam1 = easeInExpo_mod(foam1);
     foam1 *= foam1;
     if (foam1 < 0.01) {
-        color = mix(vec4(1.0), u_Color, 0.45);
+        color = mix(vec4(1.0), u_Color, 0.5);
     }
     
     out_Col = color;
