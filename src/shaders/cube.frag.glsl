@@ -20,39 +20,61 @@ in vec4 fs_Nor;
 in vec4 fs_LightVec;
 in vec4 fs_Col;
 in vec2 fs_UV;
+in vec4 fs_Pos;
 
 out vec4 out_Col; // This is the final output color that you will see on your
                   // screen for the pixel that is currently being processed.
 
-vec2 random2( vec2 p ) {
-    return fract(sin(vec2(dot(p, vec2(127.1, 311.7)),
-                 dot(p, vec2(269.5,183.3))))
-                 * 43758.5453);
+vec3 random3(vec3 p) {
+    vec4 vals = vec4(443.897, 441.423, .0973, .1099);
+    p = fract(p * vals.xyz);
+    p += dot(p, p.yxz + 19.19);
+    return fract((p.xxy + p.yzz) * p.zyx);
 }
 
-vec2 random2to2(vec2 p) {
-    return sin(vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5,183.3)))) * 43758.5453;
-}
+vec2 worley2(vec3 p) {
+    // Cube is hardcoded to be between -1 and 1, normalize to [0, 1]
+    p = 0.5 * p + 0.5;
+    p *= float(u_NumCells);
 
-vec2 random3(vec3 p) {
-    return fract(random2to2(p.yx) * random2to2(p.xz));
-}
+    vec3 n = floor( p );
+    vec3 f = fract( p );
 
-float worley(vec2 uv) {
-    uv *= float(u_NumCells); // Now the space is 10x10 instead of 1x1. Change this to any number you want.
-    vec2 uvInt = floor(uv);
-    vec2 uvFract = fract(uv);
-    float minDist = 1.0; // Minimum distance initialized to max.
-    for(int y = -1; y <= 1; ++y) {
-        for(int x = -1; x <= 1; ++x) {
-            vec2 neighbor = vec2(float(x), float(y)); // Direction in which neighbor cell lies
-            vec2 point = random2(uvInt + neighbor); // Get the Voronoi centerpoint for the neighboring cell
-            vec2 diff = neighbor + point - uvFract; // Distance between fragment coord and neighbor’s Voronoi point
-            float dist = length(diff);
-            minDist = min(minDist, dist);
+    float distF1 = 1.0;
+    float distF2 = 1.0;
+    vec3 off1 = vec3(0.0);
+    vec3 pos1 = vec3(0.0);
+    vec3 off2 = vec3(0.0);
+    vec3 pos2 = vec3(0.0);
+    for( int k = -1; k <= 1; k++ ) {
+        for( int j= -1; j <= 1; j++ ) {
+            for( int i=-1; i <= 1; i++ ) {	
+                vec3  g = vec3(i,j,k);
+                vec3  o = random3( n + g );
+                vec3  p = g + o;
+                float d = distance(p, f);
+                if (d < distF1) {
+                    distF2 = distF1;
+                    distF1 = d;
+                    off2 = off1;
+                    off1 = g;
+                    pos2 = pos1;
+                    pos1 = p;
+                }
+                else if (d < distF2) {
+                    distF2 = d;
+                    off2 = g;
+                    pos2 = p;
+                }
+            }
         }
     }
-    return minDist;
+
+    return vec2(distF1, distF2);
+}
+
+float worley(vec3 p) { 
+    return worley2(p).x;
 }
 
 void main()
@@ -73,6 +95,6 @@ void main()
 
         // Compute final shaded color
         // out_Col = vec4(diffuseColor.rgb, diffuseColor.a);
-        float worley = worley(fs_UV);
+        float worley = worley(fs_Pos.xyz);
         out_Col = vec4(worley, worley, worley, 1);
 }
