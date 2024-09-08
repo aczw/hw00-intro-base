@@ -12,6 +12,7 @@
 precision highp float;
 
 uniform vec4 u_Color; // The color with which to render this instance of geometry.
+uniform int u_NumCells;
 
 // These are the interpolated values out of the rasterizer, so you can't know
 // their specific values without knowing the vertices that contributed to them
@@ -23,12 +24,35 @@ in vec2 fs_UV;
 out vec4 out_Col; // This is the final output color that you will see on your
                   // screen for the pixel that is currently being processed.
 
+vec2 random2( vec2 p ) {
+    return fract(sin(vec2(dot(p, vec2(127.1, 311.7)),
+                 dot(p, vec2(269.5,183.3))))
+                 * 43758.5453);
+}
+
 vec2 random2to2(vec2 p) {
     return sin(vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5,183.3)))) * 43758.5453;
 }
 
 vec2 random3(vec3 p) {
     return fract(random2to2(p.yx) * random2to2(p.xz));
+}
+
+float worley(vec2 uv) {
+    uv *= float(u_NumCells); // Now the space is 10x10 instead of 1x1. Change this to any number you want.
+    vec2 uvInt = floor(uv);
+    vec2 uvFract = fract(uv);
+    float minDist = 1.0; // Minimum distance initialized to max.
+    for(int y = -1; y <= 1; ++y) {
+        for(int x = -1; x <= 1; ++x) {
+            vec2 neighbor = vec2(float(x), float(y)); // Direction in which neighbor cell lies
+            vec2 point = random2(uvInt + neighbor); // Get the Voronoi centerpoint for the neighboring cell
+            vec2 diff = neighbor + point - uvFract; // Distance between fragment coord and neighbor’s Voronoi point
+            float dist = length(diff);
+            minDist = min(minDist, dist);
+        }
+    }
+    return minDist;
 }
 
 void main()
@@ -48,6 +72,7 @@ void main()
                                                             //lit by our point light are not completely black.
 
         // Compute final shaded color
-        out_Col = vec4(diffuseColor.rgb, diffuseColor.a);
-        // out_Col = vec4(fs_UV.y, fs_UV.y, fs_UV.y, 1);
+        // out_Col = vec4(diffuseColor.rgb, diffuseColor.a);
+        float worley = worley(fs_UV);
+        out_Col = vec4(worley, worley, worley, 1);
 }

@@ -16,6 +16,7 @@ const controls = {
   geometry: "cube - custom",
   'color1': [31, 115, 210, 1],
   tesselations: 5,
+  numCells: 2
 };
 
 let icosphere: Icosphere;
@@ -36,6 +37,7 @@ function setupControls() {
   const gui = new DAT.GUI();
   gui.add(controls, "geometry", ["icosphere", "square", "cube - regular", "cube - custom"]);
   gui.addColor(controls, 'color1');
+  gui.add(controls, "numCells", 1, 10).step(1);
   gui.add(controls, 'tesselations', 0, 8).step(1);
 }
 
@@ -94,7 +96,6 @@ function main() {
       icosphere.create();
     }
 
-    
     const geometryColor = vec4.fromValues(
       controls.color1[0] / 255,
       controls.color1[1] / 255,
@@ -106,6 +107,7 @@ function main() {
     if (controls.geometry === "cube - custom") {
       shaderProgram = cubeProg;
       cubeProg.setGeometryColor(geometryColor);
+      cubeProg.setNumCells(controls.numCells);
     } else {
       lambertProg.setGeometryColor(geometryColor);
     }
