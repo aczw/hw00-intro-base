@@ -5,6 +5,17 @@
 </p>
 <p align="center">(source: Ken Perlin)</p>
 
+## Submission Description (czw)
+
+Live demo: [https://aczw.github.io/hw00-intro-base/](https://aczw.github.io/hw00-intro-base/)
+
+![Cube](./screenshots/cube.png)
+![Icosphere](./screenshots/icosphere.png)
+
+**Vertex shader:** I tried to use the trig functions to make the geometry look like it was made of water, fluid and moving and "waving."
+
+**Fragment shader:** I used 3D Worley noise and incrementing time to create what (hopefully) looks like sea foam moving across the surface of the geometry. Foam roughness, speed, overall liquid color, and cell count can all be customized via the GUI.
+
 ## Objective
 - Check that the tools and build configuration we will be using for the class works.
 - Start learning Typescript and WebGL2
