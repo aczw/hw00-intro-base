@@ -18,6 +18,7 @@ uniform mat4 u_ModelInvTr;  // The inverse transpose of the model matrix.
 uniform mat4 u_ViewProj;    // The matrix that defines the camera's transformation.
                             // We've written a static matrix for you to use for HW2,
                             // but in HW3 you'll have to generate one yourself
+uniform highp int u_Time;
 
 in vec4 vs_Pos;             // The array of vertex positions passed to the shader
 
@@ -35,6 +36,13 @@ out vec4 fs_Pos;
 const vec4 lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, which is used to compute the shading of
                                         //the geometry in the fragment shader.
 
+vec3 random3(vec3 p) {
+    vec4 vals = vec4(443.897, 441.423, .0973, .1099);
+    p = fract(p * vals.xyz);
+    p += dot(p, p.yxz + 19.19);
+    return fract((p.xxy + p.yzz) * p.zyx);
+}
+
 void main()
 {
     fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
@@ -47,9 +55,14 @@ void main()
                                                             // model matrix. This is necessary to ensure the normals remain
                                                             // perpendicular to the surface after the surface is transformed by
                                                             // the model matrix.
+    vec3 randVec = random3(vs_Pos.xyz);
+    float rand = randVec.x + randVec.y + randVec.z;
+    float val = 0.1 * sin(5.0 * (float(u_Time) * rand) / 300.0) + 0.9;
 
+    vec4 pos = vs_Pos;
+    pos.xyz = vec3(val * pos.x, val * pos.y, val * pos.z);
 
-    vec4 modelposition = u_Model * vs_Pos;   // Temporarily store the transformed vertex positions for use below
+    vec4 modelposition = u_Model * pos;   // Temporarily store the transformed vertex positions for use below
 
     fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
 

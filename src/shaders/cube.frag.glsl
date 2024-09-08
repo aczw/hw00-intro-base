@@ -13,7 +13,7 @@ precision highp float;
 
 uniform vec4 u_Color; // The color with which to render this instance of geometry.
 uniform int u_NumCells;
-uniform int u_Time;
+uniform highp int u_Time;
 uniform float u_FoamSpeed;
 uniform float u_FoamRoughness;
 
