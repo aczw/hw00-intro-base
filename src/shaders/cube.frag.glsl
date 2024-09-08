@@ -77,18 +77,22 @@ float worley(vec3 p) {
     return 1.0-worley2(p).x;
 }
 
+float easeInExpo_mod(float x) {
+    return x == 0.0 ? 0.0 : clamp(pow(2.0, 10.0 * x - 7.5), 0.0, 1.0);
+}
+
 void main()
 {
     // Material base color (before shading)
     vec4 color = u_Color;
 
     // Compute final shaded color
-    // out_Col = vec4(diffuseColor.rgb, diffuseColor.a);
-    float foam1 = worley(fs_Pos.xyz);
-    if (foam1 < 0.5) {
-        color = vec4(foam1, foam1, foam1, 1);
+    float foam1 = worley(fs_Pos.xyz + random3(fs_Pos.xyz) * 0.4);
+    foam1 = easeInExpo_mod(foam1);
+    foam1 *= foam1;
+    if (foam1 < 0.02) {
+        color = mix(vec4(1, 1, 1, 1), u_Color, 0.25);
     }
     
     out_Col = color;
-    // out_Col = vec4(foam1, foam1, foam1, 1);
 }

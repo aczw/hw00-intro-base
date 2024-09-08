@@ -16,7 +16,7 @@ const controls = {
   geometry: "cube - custom",
   'color1': [31, 115, 210, 1],
   tesselations: 5,
-  numCells: 2
+  numCells: 3
 };
 
 let icosphere: Icosphere;
