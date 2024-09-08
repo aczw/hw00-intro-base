@@ -13,7 +13,8 @@ import type Drawable from './rendering/gl/Drawable';
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-  geometry: "cube - custom",
+  geometry: "cube",
+  shaderProgram: "custom",
   'color1': [31, 115, 210, 1],
   tesselations: 5,
   numCells: 3,
@@ -39,7 +40,8 @@ function setupControls() {
   const gui = new DAT.GUI();
   gui.width = 320;
 
-  gui.add(controls, "geometry", ["icosphere", "square", "cube - regular", "cube - custom"]);
+  gui.add(controls, "geometry", ["icosphere", "square", "cube"]);
+  gui.add(controls, "shaderProgram", ["lambert", "custom"])
   gui.addColor(controls, 'color1');
   gui.add(controls, "numCells", 1, 10).step(1);
   gui.add(controls, "foamSpeed", 1, 10).step(0.1);
@@ -83,7 +85,7 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.glsl')),
   ]);
 
-  const cubeProg = new ShaderProgram([
+  const customProg = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/cube.vert.glsl')),
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/cube.frag.glsl')),
   ]);
@@ -97,7 +99,7 @@ function main() {
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
 
-    if(controls.tesselations != prevTesselations)
+    if (controls.geometry === "icosphere" && controls.tesselations != prevTesselations)
     {
       prevTesselations = controls.tesselations;
       icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, prevTesselations);
@@ -111,15 +113,16 @@ function main() {
       controls.color1[3]
     );
 
-    let shaderProgram = lambertProg;
-    if (controls.geometry === "cube - custom") {
-      shaderProgram = cubeProg;
+    let shaderProgram = customProg;
+    if (controls.shaderProgram === "lambert") {
+      shaderProgram = lambertProg;
+    } else {
       shaderProgram.setNumCells(controls.numCells);
       shaderProgram.setFoamSpeed(controls.foamSpeed);
       shaderProgram.setFoamRoughness(controls.foamRoughness);
+      shaderProgram.setTime(time);
     }
     shaderProgram.setGeometryColor(geometryColor);
-    shaderProgram.setTime(time);
     
     let geometry: Drawable = cube;
     if (controls.geometry === "icosphere") geometry = icosphere;

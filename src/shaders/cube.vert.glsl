@@ -57,10 +57,11 @@ void main()
                                                             // the model matrix.
     vec3 randVec = random3(vs_Pos.xyz);
     float rand = randVec.x + randVec.y + randVec.z;
-    float val = 0.1 * sin(5.0 * (float(u_Time) * rand) / 300.0) + 0.9;
+    float val1 = 0.1 * sin(5.0 * (float(u_Time) * rand) / 300.0) + 0.9;
+    float val2 = 0.05 * cos(5.0 * (float(u_Time) / rand) / 200.0) + 1.0;
 
     vec4 pos = vs_Pos;
-    pos.xyz = vec3(val * pos.x, val * pos.y, val * pos.z);
+    pos.xyz = vec3(val1 * pos.x, val2 * pos.y, val1 * val2 * pos.z);
 
     vec4 modelposition = u_Model * pos;   // Temporarily store the transformed vertex positions for use below
 
